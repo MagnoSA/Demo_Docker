@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+  selenium_hub:
+    container_name: selenium_hub_example
+    image: selenium/hub
+    networks:
+      robottestsnw: {}
+    ports:
+      - "4444"
+
+  firefoxnode:
+    container_name: firefox_node
+    image: selenium/node-firefox
+    networks:
+      robottestsnw: {}
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+
+  chromenode:
+    container_name: chrome_node
+    image: selenium/node-chrome
+    networks:
+      robottestsnw: {}
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    depends_on:
+      - selenium_hub
+    ports:
+      - 5555
+
+  robottests:
+    image: example_robot_framework:latest
+    container_name: example_robot_framework
+    command: /bin/sleep infinity
+    networks:
+      robottestsnw: {}
+    depends_on:
+      - selenium_hub
+    volumes:
+      - ./SuiteDeTestes:/robot_framework
+
+networks:
+  robottestsnw:
+    driver: bridge
